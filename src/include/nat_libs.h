@@ -9,6 +9,7 @@ void ets_isr_unmask(int i);
 void ets_install_putc1(void*arg);
 void ets_delay_us(long us);
 
+int ets_sprintf(char*buff, const char*, ...);
 void os_printf(const char*s);
 
 void uart_div_modify(int i, int v);
@@ -17,7 +18,7 @@ void ets_timer_arm_new(volatile ETSTimer*t, int a, int b, int c);
 void ets_timer_setfn(volatile ETSTimer*t, void (*f)(void*), void*ar);
 void ets_timer_disarm(volatile ETSTimer*t);
 
-int ets_strlen(char*);
+int ets_strlen(const char*);
 void ets_strcpy(unsigned char*, const char*, int);
 
 #endif

@@ -41,6 +41,7 @@
 #define interrupts() ETS_GPIO_INTR_ENABLE()
 #define noInterrupts() ETS_GPIO_INTR_DISABLE()
 
+#define F_CPU 160000000L
 #define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
 #define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
 #define microsecondsToClockCycles(a) ( (a) * clockCyclesPerMicrosecond() )
