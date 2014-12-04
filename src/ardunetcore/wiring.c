@@ -67,3 +67,23 @@ void delay(unsigned long ms) {
 void delayMicroseconds(unsigned long us) {
     os_delay_us(us);
 }
+
+unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout) {
+    
+}
+
+void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val) {
+    
+}
+
+uint8_t shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder) {
+    
+}
+
+void attachInterrupt(uint8_t pin, void (*f)(void), int mode) {
+    
+}
+
+void detachInterrupt(uint8_t pin) {
+    gpio_pin_intr_state_set(GPIO_ID_PIN(pin), GPIO_PIN_INTR_DISABLE);
+}

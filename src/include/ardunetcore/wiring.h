@@ -11,6 +11,10 @@
 #define HIGH 0x1
 #define LOW 0x0
 
+#define CHANGE 2
+#define FALLING 3
+#define RISING 4
+
 #define INPUT 0x1
 #define OUTPUT 0x0
 
@@ -34,8 +38,8 @@
 #define degrees(rad) ((rad)*RAD_TO_DEG)
 #define sq(x) ((x)*(x))
 
-#define interrupts() sei()
-#define noInterrupts() cli()
+#define interrupts() ETS_GPIO_INTR_ENABLE()
+#define noInterrupts() ETS_GPIO_INTR_DISABLE()
 
 #define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
 #define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
