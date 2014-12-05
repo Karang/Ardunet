@@ -38,4 +38,6 @@ class HTTPServer {
         void endHeader(struct espconn *conn);
 };
 
+extern HTTPServer WebServer;
+
 #endif

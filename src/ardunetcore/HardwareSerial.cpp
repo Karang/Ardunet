@@ -141,12 +141,12 @@ void HardwareSerial::printNumber(unsigned long n, uint8_t base) {
     unsigned char nBuffer[8*sizeof(long)];
     unsigned int i = 0;
     while (n>0) {
-        nBuffer[i++] = n & (base-1);
+        nBuffer[i++] = n % base;
         n /= base;
     }
     
-    for (i-- ; i>=0 ; i--) {
-        uart0_sendChar((char)((nBuffer[i]<10) ? ('0'+nBuffer[i]) : ('A'+nBuffer[i]-10)));
+    for (; i>0 ; i--) {
+        uart0_sendChar((char)((nBuffer[i-1]<10) ? ('0'+nBuffer[i-1]) : ('A'+nBuffer[i-1]-10)));
     }
 }
 

@@ -8,5 +8,6 @@ extern "C" {
 #include "ardunetcore/HardwareSerial.h"
 #include "ardunetcore/Wire.h"
 #include "ardunetcore/ArdunetWifi.h"
+#include "ardunetcore/HTTPServer.h"
 
 #endif

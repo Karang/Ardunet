@@ -20,37 +20,43 @@ void setup() {
     Wifi.beginHost("Ardunet", "", 1, WIFI_AUTH_OPEN);
     Wifi.setHostIP("192.168.0.42");
     
+    WebServer.begin(80);
+    
     pinMode(2, OUTPUT);
     digitalWrite(2, LOW);
 }
 
 void loop() {
-    Serial.println("Hello world !");
     Serial.print("This is pi : ");
     Serial.println(PI, 4);
     Serial.println(millis());
+    //Serial.println(digitalRead(2));
     
-    if (digitalRead(2) == HIGH) {
-        digitalWrite(2, LOW);
-    } else {
-        digitalWrite(2, HIGH);
-    }
+    digitalWrite(2, LOW);
+    delay(500);
+    digitalWrite(2, HIGH);
+    delay(500);
 }
 
 //// SKETCH END ////
 
-static volatile os_timer_t loop_timer;
+#define LOOP_PRIO 0
+#define SIG_LOOP 1
+#define LOOP_QUEUE_LEN 4
 
-void loop_func(void *arg) {
-    loop();
+os_event_t loop_task_queue[LOOP_QUEUE_LEN];
+
+static void ICACHE_FLASH_ATTR loop_func(os_event_t *events) {
+    if (events->sig == SIG_LOOP) {
+        loop();
+        system_os_post(LOOP_PRIO, SIG_LOOP, 0);
+    }
 }
 
 extern "C" void user_init(void) {
-  init();
-  setup();
-
-  // TODO: use task instead of timer (edit uart.c accordingly)
-  os_timer_disarm(&loop_timer);
-  os_timer_setfn(&loop_timer, (os_timer_func_t *)loop_func, NULL);
-  os_timer_arm(&loop_timer, 1000, 1);
+    init();
+    setup();
+    
+    system_os_task(loop_func, LOOP_PRIO, loop_task_queue, LOOP_QUEUE_LEN);
+    system_os_post(LOOP_PRIO, SIG_LOOP, 0 );
 }

@@ -37,7 +37,7 @@ void digitalWrite(uint8_t pin, uint8_t state) {
 }
 
 int digitalRead(uint8_t pin) {
-    return (GPIO_REG_READ(GPIO_OUT_ADDRESS) & bit(pin));
+    return GPIO_INPUT_GET(pin);
 }
 
 int analogRead(uint8_t pin) {
