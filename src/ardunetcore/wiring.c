@@ -6,21 +6,8 @@ extern "C" {
     #include "ardunetcore/wiring.h"
 }
 
-long _millis;
-
-static volatile os_timer_t millis_timer;
-
-void millis_func(void *arg) {
-    _millis++;
-}
-
 void init(void) {
     gpio_init();
-    
-    _millis = 0L;
-    os_timer_disarm(&millis_timer);
-    os_timer_setfn(&millis_timer, (os_timer_func_t *)millis_func, NULL);
-    os_timer_arm(&millis_timer, 1, 1);
 }
 
 void pinMode(uint8_t pin, uint8_t mode) {
@@ -53,11 +40,11 @@ void analogWrite(uint8_t pin, int value) {
 }
 
 unsigned long millis(void) {
-    return _millis;
+    return system_get_time()/1000L;
 }
 
 unsigned long micros(void) {
-    return _millis*1000; // TODO: -_-
+    return system_get_time();
 }
 
 void delay(unsigned long ms) {

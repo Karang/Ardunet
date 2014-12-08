@@ -16,9 +16,11 @@ extern "C" {
 void setup() {
     Serial.begin(115200);
     
-    Wifi.setMode(WIFI_MODE_HOST);
-    Wifi.beginHost("Ardunet", "", 1, WIFI_AUTH_OPEN);
+    Wifi.setMode(WIFI_MODE_HOST_DEVICE);
+    
+    Wifi.beginHost("ArduNet", "", 1, WIFI_AUTH_OPEN);
     Wifi.setHostIP("192.168.0.42");
+    //Wifi.setDeviceIP("192.168.0.42");
     
     WebServer.begin(80);
     
@@ -27,8 +29,6 @@ void setup() {
 }
 
 void loop() {
-    Serial.print("This is pi : ");
-    Serial.println(PI, 4);
     Serial.println(millis());
     //Serial.println(digitalRead(2));
     
@@ -42,7 +42,7 @@ void loop() {
 
 #define LOOP_PRIO 0
 #define SIG_LOOP 1
-#define LOOP_QUEUE_LEN 4
+#define LOOP_QUEUE_LEN 1
 
 os_event_t loop_task_queue[LOOP_QUEUE_LEN];
 
@@ -57,6 +57,6 @@ extern "C" void user_init(void) {
     init();
     setup();
     
-    system_os_task(loop_func, LOOP_PRIO, loop_task_queue, LOOP_QUEUE_LEN);
-    system_os_post(LOOP_PRIO, SIG_LOOP, 0 );
+    //system_os_task(loop_func, LOOP_PRIO, loop_task_queue, LOOP_QUEUE_LEN);
+    //system_os_post(LOOP_PRIO, SIG_LOOP, 0);
 }

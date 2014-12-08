@@ -23,10 +23,16 @@ class ArdunetWifi {
     private:
     public:
         ArdunetWifi();
+        void scan(scan_done_cb_t);
         void setMode(int wifiMode);
+        int getMode();
         void beginHost(const char*ssid, const char*pwd, int channel, AUTH_MODE auth);
+        void setDeviceIP(const char*ip);
         void setHostIP(const char*ip);
+        char *getDeviceIP();
+        char *getHostIP();
         void connectToHost(const char*ssid, const char*pwd);
+        void waitIP();
 };
 
 extern ArdunetWifi Wifi;

@@ -145,6 +145,10 @@ void HardwareSerial::printNumber(unsigned long n, uint8_t base) {
         n /= base;
     }
     
+    if (i==0) {
+        uart0_sendChar('0');
+    }
+    
     for (; i>0 ; i--) {
         uart0_sendChar((char)((nBuffer[i-1]<10) ? ('0'+nBuffer[i-1]) : ('A'+nBuffer[i-1]-10)));
     }
