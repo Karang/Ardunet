@@ -4,12 +4,13 @@
 extern "C" {
     #include "esp_common.h"
     #include "udhcp/dhcpd.h"
+    #include "freertos/portmacro.h"
 }
 
-#define WIFI_MODE_NULL          0x00
-#define WIFI_MODE_DEVICE        0x01
-#define WIFI_MODE_HOST          0x02
-#define WIFI_MODE_HOST_DEVICE   0x03
+#define WIFI_MODE_NULL          NULL_MODE
+#define WIFI_MODE_DEVICE        STATION_MODE
+#define WIFI_MODE_HOST          SOFTAP_MODE
+#define WIFI_MODE_HOST_DEVICE   STATIONAP_MODE
 
 #define WIFI_AUTH_OPEN          AUTH_OPEN
 #define WIFI_AUTH_WEP           AUTH_WEP

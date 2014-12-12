@@ -3,7 +3,6 @@
 
 extern "C" {
     #include "esp_common.h"
-    #include "freertos/portmacro.h"
 }
 
 #define DEC 10

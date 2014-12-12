@@ -7,6 +7,7 @@ void init(void) {
 }
 
 void pinMode(uint8_t pin, uint8_t mode) {
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2); // TODO
     if (mode) {
         GPIO_REG_WRITE(GPIO_ENABLE_W1TC_ADDRESS, 1<<pin); // GPIO input
     } else {
@@ -23,7 +24,7 @@ void digitalWrite(uint8_t pin, uint8_t state) {
 }
 
 int digitalRead(uint8_t pin) {
-    
+    return (GPIO_REG_READ(GPIO_OUT_ADDRESS)>>pin) & 1;
 }
 
 int analogRead(uint8_t pin) {

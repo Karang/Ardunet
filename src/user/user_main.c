@@ -3,10 +3,6 @@ extern "C" {
     
     #include "freertos/FreeRTOS.h"
     #include "freertos/task.h"
-    
-    #include "lwip/sockets.h"
-    #include "lwip/dns.h"
-    #include "lwip/netdb.h"
 }
 
 #include "ardunetcore/ardunetcore.h"
@@ -16,11 +12,12 @@ extern "C" {
 void setup() {
     Serial.begin(115200);
     
-    Wifi.setMode(WIFI_MODE_HOST_DEVICE);
-    Wifi.beginHost("ArduNet", "", 1, WIFI_AUTH_OPEN);
-    Wifi.setHostIP("192.168.0.42", "192.168.0.42", "255.255.255.0");
+    Wifi.setMode(WIFI_MODE_HOST);
+    Wifi.beginHost("ArduNet", "", 1, WIFI_AUTH_OPEN); // SSID, password, channel, Auth_method
+    Wifi.setHostIP("192.168.0.42", "192.168.0.42", "255.255.255.0"); // ip, gateway, netmask
 
-    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
+    HTTPServer.begin(80);
+
     pinMode(2, OUTPUT);
 }
 
@@ -34,7 +31,7 @@ void loop() {
 
 //// SKETCH END ////
 
-void task2(void *pvParameters) {
+void loop_task(void *pvParameters) {
     init();
     setup();
     for (;;) {
@@ -43,6 +40,6 @@ void task2(void *pvParameters) {
 }
 
 extern "C" void ICACHE_FLASH_ATTR user_init(void) {
-    xTaskCreate(task2, (const signed char*)"tsk2", 256, NULL, 2, NULL);
+    xTaskCreate(loop_task, (const signed char*)"loop", 256, NULL, 2, NULL);
 }
 

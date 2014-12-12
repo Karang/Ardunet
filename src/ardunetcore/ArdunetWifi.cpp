@@ -13,9 +13,9 @@ void ArdunetWifi::setMode(int mode) {
     if (mode<1 || mode>3) return;
     if (mode==WIFI_MODE_HOST)
         wifi_station_disconnect();
-    //ETS_UART_INTR_DISABLE();
+    portENTER_CRITICAL();
     wifi_set_opmode(mode);
-    //ETS_UART_INTR_ENABLE();
+    portEXIT_CRITICAL();
 }
 
 int ArdunetWifi::getMode() {
@@ -33,9 +33,9 @@ void ArdunetWifi::beginHost(const char*ssid, const char*pwd, int channel, AUTH_M
     if (authMode<0 || authMode>5) return;
     apConfig.authmode = authMode;
 
-    //ETS_UART_INTR_DISABLE();
+    portENTER_CRITICAL();
     wifi_softap_set_config(&apConfig);
-    //ETS_UART_INTR_ENABLE();
+    portEXIT_CRITICAL();
     
     /*struct dhcp_info *pdhcp_info = NULL;
     pdhcp_info = (struct dhcp_info *)zalloc(sizeof(struct dhcp_info));
@@ -115,9 +115,9 @@ void ArdunetWifi::connectToHost(const char*ssid, const char*pwd) {
     sprintf((char*)stationConfig.password, pwd);
 
     wifi_station_disconnect();
-    //ETS_UART_INTR_DISABLE();
+    portENTER_CRITICAL();
     wifi_station_set_config(&stationConfig);
-    //ETS_UART_INTR_ENABLE();
+    portEXIT_CRITICAL();
     wifi_station_connect();
 }
 

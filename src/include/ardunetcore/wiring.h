@@ -4,6 +4,7 @@
 #include "esp_common.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/portmacro.h"
 
 #define HIGH 0x1
 #define LOW 0x0
@@ -35,8 +36,8 @@
 #define degrees(rad) ((rad)*RAD_TO_DEG)
 #define sq(x) ((x)*(x))
 
-// Interupts
-// TODO
+#define interrupts() portEXIT_CRITICAL()
+#define noInterrupts() portENTER_CRITICAL()
 
 #define F_CPU CPU_CLK_FREQ
 #define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
