@@ -14,9 +14,12 @@ extern "C" {
 
 class ArdunetHTTPServer {
     private:
+        
     public:
         ArdunetHTTPServer();
         void begin(uint8_t p);
+        
+        void registerURL(const char*, void(*)());
         uint8_t port;
 };
 

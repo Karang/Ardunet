@@ -31,7 +31,7 @@ void loop() {
 
 //// SKETCH END ////
 
-void loop_task(void *pvParameters) {
+void main_task(void *pvParameters) {
     init();
     setup();
     for (;;) {
@@ -40,6 +40,6 @@ void loop_task(void *pvParameters) {
 }
 
 extern "C" void ICACHE_FLASH_ATTR user_init(void) {
-    xTaskCreate(loop_task, (const signed char*)"loop", 256, NULL, 2, NULL);
+    xTaskCreate(main_task, (const signed char*)"loop", 256, NULL, 2, NULL);
 }
 

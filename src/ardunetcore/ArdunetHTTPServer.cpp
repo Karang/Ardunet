@@ -4,7 +4,12 @@ ArdunetHTTPServer::ArdunetHTTPServer() {
     
 }
 
+static const char *httpNotFoundHeader="HTTP/1.0 404 Not Found\r\nServer: esp8266-ArduNet/0.1\r\nContent-Type: text/html\r\n\r\n<h1>Ardunet</h1>Sorry, content not found :(\r\n";
+
 void server_task(void *pvParameters) {
+    
+    ArdunetHTTPServer* server = (ArdunetHTTPServer*) pvParameters;
+    
     while (1) {
         struct sockaddr_in server_addr, client_addr;
         int server_sock, client_sock;
@@ -12,7 +17,7 @@ void server_task(void *pvParameters) {
         bzero(&server_addr, sizeof(struct sockaddr_in));
         server_addr.sin_family = AF_INET;
         server_addr.sin_addr.s_addr = INADDR_ANY;
-        server_addr.sin_port = htons(HTTPServer.port);
+        server_addr.sin_port = htons(server->port);
         int recbytes;
         do {
             if (-1 == (server_sock = socket(AF_INET, SOCK_STREAM, 0))) {
@@ -42,8 +47,16 @@ void server_task(void *pvParameters) {
                 while ((recbytes = read(client_sock , recv_buf, 128)) > 0) {
                     recv_buf[recbytes] = 0;
                     printf("S > read data success %d!\nS > %s\n", recbytes, recv_buf);
+                    if (recbytes < 128) {
+                        if (write(client_sock, httpNotFoundHeader, strlen(httpNotFoundHeader)+1) < 0) {
+                            printf("S > Send fail!\n");
+                        }
+                        printf("S > Send success!\n");
+                        close(client_sock);
+                    }
                 }
                 free(recv_buf);
+                
                 if (recbytes <= 0) {
                     printf("S > read data fail!\n");
                     close(client_sock);
@@ -55,7 +68,11 @@ void server_task(void *pvParameters) {
 
 void ArdunetHTTPServer::begin(uint8_t p) {
     port = p;
-    xTaskCreate(server_task, (const signed char*)"http_server", 256, NULL, 2, NULL);
+    xTaskCreate(server_task, (const signed char*)"http_server", 256, this, 2, NULL);
+}
+
+void ArdunetHTTPServer::registerURL(const char*url, void(*callback)()) {
+    
 }
 
 ArdunetHTTPServer HTTPServer = ArdunetHTTPServer();
