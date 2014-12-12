@@ -1,12 +1,9 @@
-/**
- * Port of the wiring API for ArduNet (ESP8266)
- * by Arthur Hennequin (PMClab)
- */
-
 #ifndef __WIRING_H__
 #define __WIRING_H__
 
-#include "c_types.h"
+#include "esp_common.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #define HIGH 0x1
 #define LOW 0x0
@@ -38,10 +35,10 @@
 #define degrees(rad) ((rad)*RAD_TO_DEG)
 #define sq(x) ((x)*(x))
 
-#define interrupts() ETS_GPIO_INTR_ENABLE()
-#define noInterrupts() ETS_GPIO_INTR_DISABLE()
+// Interupts
+// TODO
 
-#define F_CPU 160000000L
+#define F_CPU CPU_CLK_FREQ
 #define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
 #define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
 #define microsecondsToClockCycles(a) ( (a) * clockCyclesPerMicrosecond() )

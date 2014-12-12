@@ -1,53 +1,17 @@
-extern "C" {
-    #include "driver/uart.h"
-}
-
 #include "ardunetcore/HardwareSerial.h"
 
 HardwareSerial::HardwareSerial() {
     
 }
 
-void HardwareSerial::begin(int speed) {
-    switch (speed) {
-        case 9600:
-            uart_init(BIT_RATE_9600, BIT_RATE_9600);
-            break;
-        case 19200:
-            uart_init(BIT_RATE_19200, BIT_RATE_19200);
-            break;
-        case 38400:
-            uart_init(BIT_RATE_38400, BIT_RATE_38400);
-            break;
-        case 57600:
-            uart_init(BIT_RATE_57600, BIT_RATE_57600);
-            break;
-        case 74880:
-            uart_init(BIT_RATE_74880, BIT_RATE_74880);
-            break;
-        case 115200:
-            uart_init(BIT_RATE_115200, BIT_RATE_115200);
-            break;
-        case 230400:
-            uart_init(BIT_RATE_230400, BIT_RATE_230400);
-            break;
-        case 256000:
-            uart_init(BIT_RATE_256000, BIT_RATE_256000);
-            break;
-        case 460800:
-            uart_init(BIT_RATE_460800, BIT_RATE_460800);
-            break;
-        case 921600:
-            uart_init(BIT_RATE_921600, BIT_RATE_921600);
-            break;
-        default:
-            uart_init(BIT_RATE_115200, BIT_RATE_115200);
-            break;
-    }
+void HardwareSerial::begin(long speed) {
+    uart_config(speed, EIGHT_BITS, STICK_PARITY_DIS, NONE_BITS, ONE_STOP_BIT, NONE_CTRL);
 }
 
 void HardwareSerial::print(const char*s) {
-    uart0_sendStr(s);
+    while(*s) {
+        tx_one_char(*s++);
+    }
 }
 
 void HardwareSerial::print(char c, int base) {
@@ -68,10 +32,10 @@ void HardwareSerial::print(unsigned int i, int base) {
 
 void HardwareSerial::print(long n, int base) {
     if (base==BYTE) {
-        uart0_sendChar((char)n);
+        tx_one_char((char)n);
     } else if (base==DEC) {
         if (n<0) {
-            uart0_sendChar('-');
+            tx_one_char('-');
             n = -n;
         }
         printNumber(n, base);
@@ -82,7 +46,7 @@ void HardwareSerial::print(long n, int base) {
 
 void HardwareSerial::print(unsigned long n, int base) {
     if (base==BYTE) {
-        uart0_sendChar((char)n);
+        tx_one_char((char)n);
     } else {
         printNumber(n, base);
     }
@@ -133,8 +97,56 @@ void HardwareSerial::println(double n, int digits) {
 }
 
 void HardwareSerial::println(void) {
-    uart0_sendChar('\r');
-    uart0_sendChar('\n');
+    tx_one_char('\r');
+    tx_one_char('\n');
+}
+
+// PRIVATE //
+
+void HardwareSerial::tx_one_char(char c) {
+     while (true) {
+      uint32 fifo_cnt = READ_PERI_REG(UART_STATUS(UART0)) & (UART_TXFIFO_CNT<<UART_TXFIFO_CNT_S);
+      if ((fifo_cnt >> UART_TXFIFO_CNT_S & UART_TXFIFO_CNT) < 126) {
+        break;
+      }
+    }
+
+    WRITE_PERI_REG(UART_FIFO(UART0), c);
+}
+
+void HardwareSerial::uart_config(unsigned int baut_rate, UartBitsNum4Char data_bits, UartExistParity exist_parity, UartParityMode parity, UartStopBitsNum stop_bits, UartFlowCtrl flow_ctrl) {
+    /* rcv_buff size if 0x100 */
+    //ETS_UART_INTR_ATTACH(uart0_rx_intr_handler,  &(UartDev.rcv_buff));
+    PIN_PULLUP_DIS(PERIPHS_IO_MUX_U0TXD_U);
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0TXD_U, FUNC_U0TXD);
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, FUNC_U0RTS);
+    
+    uart_div_modify(UART0, UART_CLK_FREQ / baut_rate);
+    
+    WRITE_PERI_REG(UART_CONF0(UART0), exist_parity
+                 | parity
+                 | (stop_bits << UART_STOP_BIT_NUM_S)
+                 | (data_bits << UART_BIT_NUM_S));
+    
+    // clear rx and tx fifo,not ready
+    SET_PERI_REG_MASK(UART_CONF0(UART0), UART_RXFIFO_RST | UART_TXFIFO_RST);
+    CLEAR_PERI_REG_MASK(UART_CONF0(UART0), UART_RXFIFO_RST | UART_TXFIFO_RST);
+    
+    // set rx fifo trigger
+    // WRITE_PERI_REG(UART_CONF1(uart_no), ((UartDev.rcv_buff.TrigLvl & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S) | ((96 & UART_TXFIFO_EMPTY_THRHD) << UART_TXFIFO_EMPTY_THRHD_S) | UART_RX_FLOW_EN);
+    // set rx fifo trigger
+    WRITE_PERI_REG(UART_CONF1(UART0),
+                   ((0x10 & UART_RXFIFO_FULL_THRHD) << UART_RXFIFO_FULL_THRHD_S) |
+                   ((0x10 & UART_RX_FLOW_THRHD) << UART_RX_FLOW_THRHD_S) |
+                   UART_RX_FLOW_EN |
+                   (0x02 & UART_RX_TOUT_THRHD) << UART_RX_TOUT_THRHD_S |
+                   UART_RX_TOUT_EN);
+    SET_PERI_REG_MASK(UART_INT_ENA(UART0), UART_RXFIFO_TOUT_INT_ENA | UART_FRM_ERR_INT_ENA);
+    
+    // clear all interrupt
+    WRITE_PERI_REG(UART_INT_CLR(UART0), 0xffff);
+    // enable rx_interrupt
+    SET_PERI_REG_MASK(UART_INT_ENA(UART0), UART_RXFIFO_FULL_INT_ENA);
 }
 
 void HardwareSerial::printNumber(unsigned long n, uint8_t base) {
@@ -146,17 +158,17 @@ void HardwareSerial::printNumber(unsigned long n, uint8_t base) {
     }
     
     if (i==0) {
-        uart0_sendChar('0');
+        tx_one_char('0');
     }
     
     for (; i>0 ; i--) {
-        uart0_sendChar((char)((nBuffer[i-1]<10) ? ('0'+nBuffer[i-1]) : ('A'+nBuffer[i-1]-10)));
+        tx_one_char((char)((nBuffer[i-1]<10) ? ('0'+nBuffer[i-1]) : ('A'+nBuffer[i-1]-10)));
     }
 }
 
 void HardwareSerial::printFloat(double n, uint8_t digits) {
     if (n<0) {
-        uart0_sendChar('-');
+        tx_one_char('-');
         n = -n;
     }
     
@@ -169,12 +181,12 @@ void HardwareSerial::printFloat(double n, uint8_t digits) {
     printNumber(int_part, DEC);
     
     if (digits>0)
-        uart0_sendChar('.');
+        tx_one_char('.');
         
     while (digits-- > 0) {
         rest *= 10.0;
         int toPrint = int(rest);
-        uart0_sendChar((char)('0'+toPrint));
+        tx_one_char((char)('0'+toPrint));
         rest -= toPrint;
     }
 }

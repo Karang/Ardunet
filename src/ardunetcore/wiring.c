@@ -1,30 +1,29 @@
 extern "C" {
-    #include "nat_libs.h"
-    #include "user_interface.h"
-    #include "osapi.h"
-    #include "gpio.h"
     #include "ardunetcore/wiring.h"
 }
 
 void init(void) {
-    gpio_init();
+    
 }
 
 void pinMode(uint8_t pin, uint8_t mode) {
-    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
+    if (mode) {
+        GPIO_REG_WRITE(GPIO_ENABLE_W1TC_ADDRESS, 1<<pin); // GPIO input
+    } else {
+        GPIO_REG_WRITE(GPIO_ENABLE_W1TS_ADDRESS, 1<<pin); // GPIO output
+    }
 }
 
 void digitalWrite(uint8_t pin, uint8_t state) {
-    uint8_t mask = bit(pin);
-    if (state&0x1) {
-        gpio_output_set(0, mask, mask, 0);
+    if (state) {
+        GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, 1<<pin); // GPIO high
     } else {
-        gpio_output_set(mask, 0, mask, 0);
+        GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, 1<<pin); // GPIO low
     }
 }
 
 int digitalRead(uint8_t pin) {
-    return GPIO_INPUT_GET(pin);
+    
 }
 
 int analogRead(uint8_t pin) {
@@ -48,7 +47,7 @@ unsigned long micros(void) {
 }
 
 void delay(unsigned long ms) {
-    delayMicroseconds(ms*1000);
+    vTaskDelay(ms / portTICK_RATE_MS);
 }
 
 void delayMicroseconds(unsigned long us) {
@@ -67,10 +66,10 @@ uint8_t shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder) {
     
 }
 
-void attachInterrupt(uint8_t pin, void (*f)(void), int mode) {
+void attachInterrupt(uint8_t, void (*)(void), int mode) {
     
 }
 
-void detachInterrupt(uint8_t pin) {
-    gpio_pin_intr_state_set(GPIO_ID_PIN(pin), GPIO_PIN_INTR_DISABLE);
+void detachInterrupt(uint8_t) {
+    
 }

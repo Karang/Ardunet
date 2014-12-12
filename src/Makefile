@@ -23,8 +23,7 @@ GEN_BINS= eagle.app.v6.bin
 SPECIAL_MKTARGETS=$(APP_MKTARGETS)
 SUBDIRS=    \
 	user	\
-	ardunetcore \
-	driver
+	ardunetcore
 
 endif # } PDIR
 
@@ -59,8 +58,7 @@ endif
 
 COMPONENTS_eagle.app.v6 = \
 	user/libuser.a	\
-	ardunetcore/libardunet.a \
-	driver/libdriver.a
+	ardunetcore/libardunet.a
 
 LINKFLAGS_eagle.app.v6 = \
 	-L../lib        \
@@ -70,17 +68,16 @@ LINKFLAGS_eagle.app.v6 = \
     -u call_user_start	\
 	-Wl,-static						\
 	-Wl,--start-group					\
-	-lc					\
 	-lgcc					\
 	-lhal					\
 	-lphy	\
 	-lpp	\
 	-lnet80211	\
-	-llwip	\
 	-lwpa	\
 	-lmain	\
-	-ljson	\
-	-lupgrade\
+	-lfreertos	\
+	-llwip	\
+	-ludhcp	\
 	$(DEP_LIBS_eagle.app.v6)					\
 	-Wl,--end-group
 

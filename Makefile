@@ -127,7 +127,7 @@ $(OBJODIR)/%.d: %.c
 	$(CC) -M $(CFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\.o\)[ :]*,$(OBJODIR)/\1 $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
-	
+
 $(OBJODIR)/%.o: %.cpp
 	@mkdir -p $(OBJODIR);
 	$(CPP) $(if $(findstring $<,$(DSRCS)),$(DFLAGS),$(CFLAGS)) $(COPTS_$(*F)) -o $@ -c $<
@@ -185,5 +185,7 @@ $(foreach image,$(GEN_IMAGES),$(eval $(call MakeImage,$(basename $(image)))))
 #
 
 INCLUDES := $(INCLUDES) -I $(PDIR)include -I $(PDIR)include/$(TARGET)
+INCLUDES += -I ./ -I $(PDIR)include/lwip -I $(PDIR)include/lwip/ipv4 -I $(PDIR)include/lwip/ipv6
+INCLUDES += -I $(PDIR)include/espressif
 PDIR := ../$(PDIR)
 sinclude $(PDIR)Makefile
