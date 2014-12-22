@@ -1,0 +1,2 @@
+python ardunet.py
+pause
