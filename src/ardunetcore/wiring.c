@@ -1,13 +1,20 @@
 extern "C" {
     #include "ardunetcore/wiring.h"
+    #include "ardunetcore/pwm.h"
 }
 
 void init(void) {
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDI_U, FUNC_GPIO12); // PWM 0
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, FUNC_GPIO15); // PWM 1
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U, FUNC_GPIO13); // PWM 2
     
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
+    
+    uint8_t duty[PWM_CHANNEL] = {0,0,0};
+    pwm_init(100, duty);
 }
 
 void pinMode(uint8_t pin, uint8_t mode) {
-    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2); // TODO
     if (mode) {
         GPIO_REG_WRITE(GPIO_ENABLE_W1TC_ADDRESS, 1<<pin); // GPIO input
     } else {
@@ -36,7 +43,8 @@ void analogReference(uint8_t mode) {
 }
 
 void analogWrite(uint8_t pin, int value) {
-    
+    pwm_set_duty(value, 0);
+    pwm_start();
 }
 
 unsigned long millis(void) {
@@ -67,10 +75,10 @@ uint8_t shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder) {
     
 }
 
-void attachInterrupt(uint8_t, void (*)(void), int mode) {
+void attachInterrupt(uint8_t pin, void (*callback)(void), int mode) {
     
 }
 
-void detachInterrupt(uint8_t) {
+void detachInterrupt(uint8_t pin) {
     
 }

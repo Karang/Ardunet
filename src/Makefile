@@ -23,6 +23,7 @@ GEN_BINS= eagle.app.v6.bin
 SPECIAL_MKTARGETS=$(APP_MKTARGETS)
 SUBDIRS=    \
 	user	\
+	sketch	\
 	ardunetcore
 
 endif # } PDIR
@@ -58,6 +59,7 @@ endif
 
 COMPONENTS_eagle.app.v6 = \
 	user/libuser.a	\
+	sketch/libsketch.a	\
 	ardunetcore/libardunet.a
 
 LINKFLAGS_eagle.app.v6 = \
