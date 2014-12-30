@@ -3,18 +3,50 @@ extern "C" {
     #include "ardunetcore/pwm.h"
 }
 
-void init(void) {
-    PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDI_U, FUNC_GPIO12); // PWM 0
-    PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, FUNC_GPIO15); // PWM 1
-    PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U, FUNC_GPIO13); // PWM 2
-    
-    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
-    
+int gpio_pin_register[16] = {PERIPHS_IO_MUX_GPIO0_U,
+                             PERIPHS_IO_MUX_U0TXD_U,
+                             PERIPHS_IO_MUX_GPIO2_U,
+                             PERIPHS_IO_MUX_U0RXD_U,
+                             PERIPHS_IO_MUX_GPIO4_U,
+                             PERIPHS_IO_MUX_GPIO5_U,
+                             PERIPHS_IO_MUX_SD_CLK_U,
+                             PERIPHS_IO_MUX_SD_DATA0_U,
+                             PERIPHS_IO_MUX_SD_DATA1_U,
+                             PERIPHS_IO_MUX_SD_DATA2_U,
+                             PERIPHS_IO_MUX_SD_DATA3_U,
+                             PERIPHS_IO_MUX_SD_CMD_U,
+                             PERIPHS_IO_MUX_MTDI_U,
+                             PERIPHS_IO_MUX_MTCK_U,
+                             PERIPHS_IO_MUX_MTMS_U,
+                             PERIPHS_IO_MUX_MTDO_U};
+
+#define GPIO_PIN_ADDR(i)    (GPIO_PIN0_ADDRESS + i*4)
+
+void (*callbacks[16])(void);
+
+void ICACHE_FLASH_ATTR interruptHandler(int gpio_mask) {
+    for (int i=0 ; i<16 ; i++) {
+        if ((0x1<<i) & gpio_mask) {
+            if (callbacks[i]!=NULL) {
+                callbacks[i]();
+            }
+        }
+    }
+    //gpio_intr_ack();
+}
+
+void ICACHE_FLASH_ATTR init(void) {
+    _xt_isr_attach(ETS_GPIO_INUM, (_xt_isr)&interruptHandler);
     uint8_t duty[PWM_CHANNEL] = {0,0,0};
     pwm_init(100, duty);
 }
 
-void pinMode(uint8_t pin, uint8_t mode) {
+void ICACHE_FLASH_ATTR pinMode(uint8_t pin, uint8_t mode) {
+    if ((0x1 << pin) & 0b110101) {
+        PIN_FUNC_SELECT(gpio_pin_register[pin], 0);
+    } else {
+        PIN_FUNC_SELECT(gpio_pin_register[pin], 3);
+    }
     if (mode) {
         GPIO_REG_WRITE(GPIO_ENABLE_W1TC_ADDRESS, 1<<pin); // GPIO input
     } else {
@@ -22,7 +54,7 @@ void pinMode(uint8_t pin, uint8_t mode) {
     }
 }
 
-void digitalWrite(uint8_t pin, uint8_t state) {
+void ICACHE_FLASH_ATTR digitalWrite(uint8_t pin, uint8_t state) {
     if (state) {
         GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, 1<<pin); // GPIO high
     } else {
@@ -30,55 +62,71 @@ void digitalWrite(uint8_t pin, uint8_t state) {
     }
 }
 
-int digitalRead(uint8_t pin) {
+int ICACHE_FLASH_ATTR digitalRead(uint8_t pin) {
     return (GPIO_REG_READ(GPIO_OUT_ADDRESS)>>pin) & 1;
 }
 
-int analogRead(uint8_t pin) {
+int ICACHE_FLASH_ATTR analogRead(uint8_t pin) {
     return 0;
 }
 
-void analogReference(uint8_t mode) {
+void ICACHE_FLASH_ATTR analogReference(uint8_t mode) {
     
 }
 
-void analogWrite(uint8_t pin, int value) {
+void ICACHE_FLASH_ATTR analogWrite(uint8_t pin, int value) {
     pwm_set_duty(value, 0);
     pwm_start();
 }
 
-unsigned long millis(void) {
+unsigned long ICACHE_FLASH_ATTR millis(void) {
     return system_get_time()/1000L;
 }
 
-unsigned long micros(void) {
+unsigned long ICACHE_FLASH_ATTR micros(void) {
     return system_get_time();
 }
 
-void delay(unsigned long ms) {
+void ICACHE_FLASH_ATTR delay(unsigned long ms) {
     vTaskDelay(ms / portTICK_RATE_MS);
 }
 
-void delayMicroseconds(unsigned long us) {
+void ICACHE_FLASH_ATTR delayMicroseconds(unsigned long us) {
     os_delay_us(us);
 }
 
-unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout) {
+unsigned long ICACHE_FLASH_ATTR pulseIn(uint8_t pin, uint8_t state, unsigned long timeout) {
     
 }
 
-void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val) {
+void ICACHE_FLASH_ATTR shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val) {
     
 }
 
-uint8_t shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder) {
+uint8_t ICACHE_FLASH_ATTR shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder) {
     
 }
 
-void attachInterrupt(uint8_t pin, void (*callback)(void), int mode) {
+void ICACHE_FLASH_ATTR attachInterrupt(uint8_t pin, void (*callback)(void), int mode) {
+    if (pin<0 || pin>=16) return;
+    callbacks[pin] = callback;
     
+    portENTER_CRITICAL();
+    uint32 pin_reg = GPIO_REG_READ(GPIO_PIN_ADDR(pin));
+    pin_reg &= (~GPIO_PIN_INT_TYPE_MASK);
+    pin_reg |= (mode << GPIO_PIN_INT_TYPE_LSB);
+    GPIO_REG_WRITE(GPIO_PIN_ADDR(pin), pin_reg);
+    portEXIT_CRITICAL();
 }
 
-void detachInterrupt(uint8_t pin) {
+void ICACHE_FLASH_ATTR detachInterrupt(uint8_t pin) {
+    if (pin<0 || pin>=16) return;
+    callbacks[pin] = NULL;
     
+    portENTER_CRITICAL();
+    uint32 pin_reg = GPIO_REG_READ(GPIO_PIN_ADDR(pin));
+    pin_reg &= (~GPIO_PIN_INT_TYPE_MASK);
+    pin_reg |= (GPIO_PIN_INTR_DISABLE << GPIO_PIN_INT_TYPE_LSB);
+    GPIO_REG_WRITE(GPIO_PIN_ADDR(pin), pin_reg);
+    portEXIT_CRITICAL();
 }

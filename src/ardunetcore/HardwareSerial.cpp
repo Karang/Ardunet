@@ -1,36 +1,36 @@
 #include "ardunetcore/HardwareSerial.h"
 
-HardwareSerial::HardwareSerial() {
+ICACHE_FLASH_ATTR HardwareSerial::HardwareSerial() {
     
 }
 
-void HardwareSerial::begin(long speed) {
+void ICACHE_FLASH_ATTR HardwareSerial::begin(long speed) {
     uart_config(speed, EIGHT_BITS, STICK_PARITY_DIS, NONE_BITS, ONE_STOP_BIT, NONE_CTRL);
 }
 
-void HardwareSerial::print(const char*s) {
+void ICACHE_FLASH_ATTR HardwareSerial::print(const char*s) {
     while(*s) {
         tx_one_char(*s++);
     }
 }
 
-void HardwareSerial::print(char c, int base) {
+void ICACHE_FLASH_ATTR HardwareSerial::print(char c, int base) {
     print((long) c, base);
 }
 
-void HardwareSerial::print(unsigned char c, int base) {
+void ICACHE_FLASH_ATTR HardwareSerial::print(unsigned char c, int base) {
     print((unsigned long) c, base);
 }
 
-void HardwareSerial::print(int i, int base) {
+void ICACHE_FLASH_ATTR HardwareSerial::print(int i, int base) {
     print((long) i, base);
 }
 
-void HardwareSerial::print(unsigned int i, int base) {
+void ICACHE_FLASH_ATTR HardwareSerial::print(unsigned int i, int base) {
     print((unsigned long) i, base);
 }
 
-void HardwareSerial::print(long n, int base) {
+void ICACHE_FLASH_ATTR HardwareSerial::print(long n, int base) {
     if (base==BYTE) {
         tx_one_char((char)n);
     } else if (base==DEC) {
@@ -44,7 +44,7 @@ void HardwareSerial::print(long n, int base) {
     }
 }
 
-void HardwareSerial::print(unsigned long n, int base) {
+void ICACHE_FLASH_ATTR HardwareSerial::print(unsigned long n, int base) {
     if (base==BYTE) {
         tx_one_char((char)n);
     } else {
@@ -52,58 +52,58 @@ void HardwareSerial::print(unsigned long n, int base) {
     }
 }
 
-void HardwareSerial::print(double n, int digits) {
+void ICACHE_FLASH_ATTR HardwareSerial::print(double n, int digits) {
     printFloat(n, digits);
 }
 
-void HardwareSerial::println(const char*s) {
+void ICACHE_FLASH_ATTR HardwareSerial::println(const char*s) {
     print(s);
     println();
 }
 
-void HardwareSerial::println(char c, int base) {
+void ICACHE_FLASH_ATTR HardwareSerial::println(char c, int base) {
     print(c, base);
     println();
 }
 
-void HardwareSerial::println(unsigned char c, int base) {
+void ICACHE_FLASH_ATTR HardwareSerial::println(unsigned char c, int base) {
     print(c, base);
     println();
 }
 
-void HardwareSerial::println(int n, int base) {
+void ICACHE_FLASH_ATTR HardwareSerial::println(int n, int base) {
     print(n, base);
     println();
 }
 
-void HardwareSerial::println(unsigned int n, int base) {
+void ICACHE_FLASH_ATTR HardwareSerial::println(unsigned int n, int base) {
     print(n, base);
     println();
 }
 
-void HardwareSerial::println(long n, int base) {
+void ICACHE_FLASH_ATTR HardwareSerial::println(long n, int base) {
     print(n, base);
     println();
 }
 
-void HardwareSerial::println(unsigned long n, int base) {
+void ICACHE_FLASH_ATTR HardwareSerial::println(unsigned long n, int base) {
     print(n, base);
     println();
 }
 
-void HardwareSerial::println(double n, int digits) {
+void ICACHE_FLASH_ATTR HardwareSerial::println(double n, int digits) {
     print(n, digits);
     println();
 }
 
-void HardwareSerial::println(void) {
+void ICACHE_FLASH_ATTR HardwareSerial::println(void) {
     tx_one_char('\r');
     tx_one_char('\n');
 }
 
 // PRIVATE //
 
-void HardwareSerial::tx_one_char(char c) {
+void ICACHE_FLASH_ATTR HardwareSerial::tx_one_char(char c) {
      while (true) {
       uint32 fifo_cnt = READ_PERI_REG(UART_STATUS(UART0)) & (UART_TXFIFO_CNT<<UART_TXFIFO_CNT_S);
       if ((fifo_cnt >> UART_TXFIFO_CNT_S & UART_TXFIFO_CNT) < 126) {
@@ -114,7 +114,7 @@ void HardwareSerial::tx_one_char(char c) {
     WRITE_PERI_REG(UART_FIFO(UART0), c);
 }
 
-void HardwareSerial::uart_config(unsigned int baut_rate, UartBitsNum4Char data_bits, UartExistParity exist_parity, UartParityMode parity, UartStopBitsNum stop_bits, UartFlowCtrl flow_ctrl) {
+void ICACHE_FLASH_ATTR HardwareSerial::uart_config(unsigned int baut_rate, UartBitsNum4Char data_bits, UartExistParity exist_parity, UartParityMode parity, UartStopBitsNum stop_bits, UartFlowCtrl flow_ctrl) {
     /* rcv_buff size if 0x100 */
     //ETS_UART_INTR_ATTACH(uart0_rx_intr_handler,  &(UartDev.rcv_buff));
     PIN_PULLUP_DIS(PERIPHS_IO_MUX_U0TXD_U);
@@ -149,7 +149,7 @@ void HardwareSerial::uart_config(unsigned int baut_rate, UartBitsNum4Char data_b
     SET_PERI_REG_MASK(UART_INT_ENA(UART0), UART_RXFIFO_FULL_INT_ENA);
 }
 
-void HardwareSerial::printNumber(unsigned long n, uint8_t base) {
+void ICACHE_FLASH_ATTR HardwareSerial::printNumber(unsigned long n, uint8_t base) {
     unsigned char nBuffer[8*sizeof(long)];
     unsigned int i = 0;
     while (n>0) {
@@ -166,7 +166,7 @@ void HardwareSerial::printNumber(unsigned long n, uint8_t base) {
     }
 }
 
-void HardwareSerial::printFloat(double n, uint8_t digits) {
+void ICACHE_FLASH_ATTR HardwareSerial::printFloat(double n, uint8_t digits) {
     if (n<0) {
         tx_one_char('-');
         n = -n;

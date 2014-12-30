@@ -80,6 +80,13 @@ LOCAL void ICACHE_FLASH_ATTR pwm_insert_sort(struct pwm_single_param pwm[], uint
     }
 }
 
+void ICACHE_FLASH_ATTR gpio_output_conf(uint32 set_mask, uint32 clear_mask, uint32 enable_mask, uint32 disable_mask) {
+    GPIO_REG_WRITE(GPIO_OUT_W1TS_ADDRESS, set_mask);
+    GPIO_REG_WRITE(GPIO_OUT_W1TC_ADDRESS, clear_mask);
+    GPIO_REG_WRITE(GPIO_ENABLE_W1TS_ADDRESS, enable_mask);
+    GPIO_REG_WRITE(GPIO_ENABLE_W1TC_ADDRESS, disable_mask);
+}
+
 void ICACHE_FLASH_ATTR pwm_start(void) {
     uint8 i, j;
 
@@ -142,7 +149,7 @@ void ICACHE_FLASH_ATTR pwm_start(void) {
         pwm_channel = local_channel;
         pwm_single = local_single;
         // start
-        gpio_output_set(local_single[0].gpio_set, local_single[0].gpio_clear, pwm_gpio, 0);
+        gpio_output_conf(local_single[0].gpio_set, local_single[0].gpio_clear, pwm_gpio, 0);
 
         // yeah, if all channels' duty is 0 or 255, don't need to start timer, otherwise start...
         if (*local_channel != 1) {
@@ -244,7 +251,7 @@ LOCAL void pwm_tim1_intr_handler(void) {
         pwm_single = pwm_single_toggle[pwm_toggle];
         pwm_channel = &pwm_channel_toggle[pwm_toggle];
 
-        gpio_output_set(pwm_single[*pwm_channel - 1].gpio_set,
+        gpio_output_conf(pwm_single[*pwm_channel - 1].gpio_set,
                         pwm_single[*pwm_channel - 1].gpio_clear,
                         pwm_gpio,
                         0);
@@ -257,7 +264,7 @@ LOCAL void pwm_tim1_intr_handler(void) {
             pwm_timer_down = 1;
         }
     } else {
-        gpio_output_set(pwm_single[pwm_current_channel].gpio_set,
+        gpio_output_conf(pwm_single[pwm_current_channel].gpio_set,
                         pwm_single[pwm_current_channel].gpio_clear,
                         pwm_gpio, 0);
 
