@@ -3,6 +3,8 @@ extern "C" {
     #include "ardunetcore/pwm.h"
 }
 
+#include "ardunetcore/HardwareSerial.h"
+
 int gpio_pin_register[16] = {PERIPHS_IO_MUX_GPIO0_U,
                              PERIPHS_IO_MUX_U0TXD_U,
                              PERIPHS_IO_MUX_GPIO2_U,
@@ -22,23 +24,30 @@ int gpio_pin_register[16] = {PERIPHS_IO_MUX_GPIO0_U,
 
 #define GPIO_PIN_ADDR(i)    (GPIO_PIN0_ADDRESS + i*4)
 
-void (*callbacks[16])(void);
+LOCAL void (*callbacks[16])(void);
 
-void ICACHE_FLASH_ATTR interruptHandler(int gpio_mask) {
+LOCAL void interruptHandler() {
+    uint32 gpio_mask = _xt_read_ints();
+    Serial.println(gpio_mask);
     for (int i=0 ; i<16 ; i++) {
         if ((0x1<<i) & gpio_mask) {
-            if (callbacks[i]!=NULL) {
-                callbacks[i]();
+            if (callbacks[i] != NULL) {
+                (*callbacks[i])();
             }
         }
     }
-    //gpio_intr_ack();
+    _xt_clear_ints(gpio_mask);
 }
 
 void ICACHE_FLASH_ATTR init(void) {
-    _xt_isr_attach(ETS_GPIO_INUM, (_xt_isr)&interruptHandler);
-    uint8_t duty[PWM_CHANNEL] = {0,0,0};
-    pwm_init(100, duty);
+    for (int i=0 ; i<16 ; i++) {
+        detachInterrupt(i);
+    }
+    _xt_isr_attach(ETS_GPIO_INUM, (_xt_isr)interruptHandler);
+    _xt_isr_unmask(1<<ETS_GPIO_INUM);
+    
+    //uint8_t duty[PWM_CHANNEL] = {0,0,0};
+    //pwm_init(100, duty);
 }
 
 void ICACHE_FLASH_ATTR pinMode(uint8_t pin, uint8_t mode) {
@@ -47,6 +56,8 @@ void ICACHE_FLASH_ATTR pinMode(uint8_t pin, uint8_t mode) {
     } else {
         PIN_FUNC_SELECT(gpio_pin_register[pin], 3);
     }
+    PIN_PULLDWN_DIS(gpio_pin_register[pin]);
+    PIN_PULLUP_EN(gpio_pin_register[pin]);
     if (mode) {
         GPIO_REG_WRITE(GPIO_ENABLE_W1TC_ADDRESS, 1<<pin); // GPIO input
     } else {
@@ -75,8 +86,8 @@ void ICACHE_FLASH_ATTR analogReference(uint8_t mode) {
 }
 
 void ICACHE_FLASH_ATTR analogWrite(uint8_t pin, int value) {
-    pwm_set_duty(value, 0);
-    pwm_start();
+    //pwm_set_duty(value, 0);
+    //pwm_start();
 }
 
 unsigned long ICACHE_FLASH_ATTR millis(void) {

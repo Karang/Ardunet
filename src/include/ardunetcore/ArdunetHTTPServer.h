@@ -12,6 +12,14 @@ extern "C" {
     #include "lwip/netdb.h"
 }
 
+#define GET 0
+#define POST 1
+
+typedef struct {
+    const char*url;
+    int type;
+} HeaderInfo;
+
 class ArdunetHTTPServer {
     private:
         
@@ -19,7 +27,7 @@ class ArdunetHTTPServer {
         ArdunetHTTPServer();
         void begin(uint8_t p);
         
-        void registerURL(const char*, void(*)());
+        void registerURL(const char*, char*(*)(HeaderInfo*));
         uint8_t port;
 };
 
