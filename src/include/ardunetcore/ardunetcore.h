@@ -10,5 +10,6 @@ extern "C" {
 #include "ardunetcore/ArdunetHTTPServer.h"
 #include "ardunetcore/ArdunetHTTPClient.h"
 #include "ardunetcore/HardwareSerial.h"
+#include "ardunetcore/SpiFlash.h"
 
 #endif

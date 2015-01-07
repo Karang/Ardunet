@@ -66,7 +66,7 @@ class String {
     int lastIndexOf( char ch, unsigned int fromIndex ) const;
     int lastIndexOf( const String &str ) const;
     int lastIndexOf( const String &str, unsigned int fromIndex ) const;
-    const unsigned int length( ) const { return _length; }
+    const unsigned int ICACHE_FLASH_ATTR length( ) const { return _length; }
     void setCharAt(unsigned int index, const char ch);
     unsigned char startsWith( const String &prefix ) const;
     unsigned char startsWith( const String &prefix, unsigned int toffset ) const;
@@ -77,6 +77,7 @@ class String {
     String trim( ) const;
     void getBytes(unsigned char *buf, unsigned int bufsize);
     void toCharArray(char *buf, unsigned int bufsize);
+    char* getChars();
     const String& concat( const String &str );
     String replace( char oldChar, char newChar );
     String replace( const String& match, const String& replace );
@@ -94,13 +95,13 @@ class String {
 };
 
 // allocate buffer space
-inline void String::getBuffer(unsigned int maxStrLen) {
+inline void ICACHE_FLASH_ATTR String::getBuffer(unsigned int maxStrLen) {
   _capacity = maxStrLen;
   _buffer = (char *) malloc(_capacity + 1);
   if (_buffer == NULL) _length = _capacity = 0;
 }
 
-inline String operator+( String lhs, const String &rhs ) {
+inline String ICACHE_FLASH_ATTR operator+( String lhs, const String &rhs ) {
   return lhs += rhs;
 }
 
