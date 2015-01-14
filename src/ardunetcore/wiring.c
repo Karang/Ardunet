@@ -27,8 +27,7 @@ int gpio_pin_register[16] = {PERIPHS_IO_MUX_GPIO0_U,
 LOCAL void (*callbacks[16])(void);
 
 LOCAL void interruptHandler() {
-    uint32 gpio_mask = _xt_read_ints();
-    Serial.println(gpio_mask);
+    uint32_t gpio_mask = GPIO_REG_READ(GPIO_STATUS_ADDRESS);
     for (int i=0 ; i<16 ; i++) {
         if ((0x1<<i) & gpio_mask) {
             if (callbacks[i] != NULL) {
@@ -36,7 +35,7 @@ LOCAL void interruptHandler() {
             }
         }
     }
-    _xt_clear_ints(gpio_mask);
+    GPIO_REG_WRITE(GPIO_STATUS_W1TC_ADDRESS, gpio_mask);
 }
 
 void ICACHE_FLASH_ATTR init(void) {
