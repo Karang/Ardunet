@@ -39,6 +39,15 @@ struct bss_info {
     uint8 is_hidden;
 };
 
+typedef struct _scaninfo {
+    STAILQ_HEAD(, bss_info) *pbss;
+    struct espconn *pespconn;
+    uint8 totalpage;
+    uint8 pagenum;
+    uint8 page_sn;
+    uint8 data_cnt;
+} scaninfo;
+
 typedef void (* scan_done_cb_t)(void *arg, STATUS status);
 
 bool wifi_station_scan(struct scan_config *config, scan_done_cb_t cb);

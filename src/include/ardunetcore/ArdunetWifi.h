@@ -25,7 +25,7 @@ class ArdunetWifi {
     private:
     public:
         ArdunetWifi();
-        void scan(scan_done_cb_t);
+        void scan();
         void setMode(int wifiMode);
         int getMode();
         void beginHost(const char*ssid, const char*pwd, int channel, AUTH_MODE auth);
@@ -39,6 +39,7 @@ class ArdunetWifi {
         void waitIP();
 };
 
+extern void Wifi_scan_found_bss(uint8* bssid, int channel, int rssi, int authmode, char* ssid, int is_hidden);
 extern ArdunetWifi Wifi;
 
 #endif

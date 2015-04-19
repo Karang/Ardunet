@@ -39,6 +39,8 @@ class HardwareSerial {
         void println(unsigned long, int = DEC);
         void println(double, int = 2);
         void println(void);
+        
+        void printBSSID(uint8*bssid);
 };
 
 extern "C" void uart_div_modify(int no, unsigned int freq);

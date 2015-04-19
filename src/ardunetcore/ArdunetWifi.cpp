@@ -5,8 +5,18 @@ ICACHE_FLASH_ATTR ArdunetWifi::ArdunetWifi() {
     
 }
 
-void ICACHE_FLASH_ATTR ArdunetWifi::scan(scan_done_cb_t f) {
-    wifi_station_scan((scan_config*)NULL, f);
+void ICACHE_FLASH_ATTR scan_done(void *arg, STATUS status) {
+	scaninfo *c = (scaninfo *) arg; 
+	struct bss_info *inf;
+    STAILQ_FOREACH(inf, c->pbss, next) {
+	    Wifi_scan_found_bss(inf->bssid, (int)inf->channel, (int)inf->rssi, (int)inf->authmode, (char*)inf->ssid, (int)inf->is_hidden);
+		inf = (struct bss_info *) &inf->next;
+	}
+}
+
+void ICACHE_FLASH_ATTR ArdunetWifi::scan() {
+    if (getMode()!=WIFI_MODE_DEVICE) return;
+    wifi_station_scan((scan_config*)NULL, scan_done);
 }
 
 void ICACHE_FLASH_ATTR ArdunetWifi::setMode(int mode) {

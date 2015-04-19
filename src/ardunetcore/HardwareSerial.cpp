@@ -101,6 +101,10 @@ void ICACHE_FLASH_ATTR HardwareSerial::println(void) {
     tx_one_char('\n');
 }
 
+void ICACHE_FLASH_ATTR HardwareSerial::printBSSID(uint8*bssid) {
+    printf("%02x:%02x:%02x:%02x:%02x:%02x", bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5], bssid[6]);
+}
+
 // PRIVATE //
 
 void ICACHE_FLASH_ATTR HardwareSerial::tx_one_char(char c) {

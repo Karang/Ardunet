@@ -85,8 +85,8 @@ void ICACHE_FLASH_ATTR analogReference(uint8_t mode) {
 }
 
 void ICACHE_FLASH_ATTR analogWrite(uint8_t pin, int value) {
-    //pwm_set_duty(value, 0);
-    //pwm_start();
+    pwm_set_duty(value, 0);
+    pwm_start();
 }
 
 unsigned long ICACHE_FLASH_ATTR millis(void) {

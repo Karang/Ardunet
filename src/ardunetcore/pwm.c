@@ -17,46 +17,44 @@ extern "C" {
 
 #include "ardunetcore/ardunetcore.h"
 
-LOCAL struct pwm_single_param pwm_single_toggle[2][PWM_CHANNEL + 1];
-LOCAL struct pwm_single_param *pwm_single;
+#define US_TO_RTC_TIMER_TICKS(t) \
+((t) ? \
+(((t) > 0x35A) ? \
+(((t)>>2) * ((APB_CLK_FREQ>>4)/250000) + ((t)&0x3) * ((APB_CLK_FREQ>>4)/1000000)) : \
+(((t) *(APB_CLK_FREQ>>4)) / 1000000)) : \
+0)
 
-LOCAL struct pwm_param pwm;
+#define FRC1_ENABLE_TIMER  0x80 // BIT7
 
-LOCAL uint8 pwm_out_io_num[PWM_CHANNEL] = {12, 15, 13};
+static struct pwm_single_param pwm_single_toggle[2][PWM_CHANNEL + 1];
+static struct pwm_single_param *pwm_single;
 
-LOCAL uint8 pwm_channel_toggle[2];
-LOCAL uint8 *pwm_channel;
+static struct pwm_param pwm;
 
-LOCAL uint8 pwm_toggle = 1;
-LOCAL uint8 pwm_timer_down = 1;
+static uint8 pwm_out_io_num[PWM_CHANNEL] = {12, 15, 13};
 
-LOCAL uint8 pwm_current_channel = 0;
+static uint8 pwm_channel_toggle[2];
+static uint8 *pwm_channel;
 
-LOCAL uint16 pwm_gpio = 0;
+static uint8 pwm_toggle = 1;
+static uint8 pwm_timer_down = 1;
 
-//XXX: 0xffffffff/(80000000/16)=35A
-#define US_TO_RTC_TIMER_TICKS(t)          \
-    ((t) ?                                   \
-     (((t) > 0x35A) ?                   \
-      (((t)>>2) * ((APB_CLK_FREQ>>4)/250000) + ((t)&0x3) * ((APB_CLK_FREQ>>4)/1000000))  :    \
-      (((t) *(APB_CLK_FREQ>>4)) / 1000000)) :    \
-     0)
+static uint8 pwm_current_channel = 0;
 
-//FRC1
-#define FRC1_ENABLE_TIMER  BIT7
+static uint16 pwm_gpio = 0;
 
 typedef enum {
-    DIVDED_BY_1 = 0,
-    DIVDED_BY_16 = 4,
+    DIVDED_BY_1   = 0,
+    DIVDED_BY_16  = 4,
     DIVDED_BY_256 = 8,
 } TIMER_PREDIVED_MODE;
 
 typedef enum {
     TM_LEVEL_INT = 1,
-    TM_EDGE_INT   = 0,
+    TM_EDGE_INT  = 0,
 } TIMER_INT_MODE;
 
-LOCAL void ICACHE_FLASH_ATTR pwm_insert_sort(struct pwm_single_param pwm[], uint8 n) {
+void ICACHE_FLASH_ATTR pwm_insert_sort(struct pwm_single_param pwm[], uint8 n) {
     uint8 i;
 
     for (i = 1; i < n; i++) {

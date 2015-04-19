@@ -1,6 +1,3 @@
-#include "ardunetcore/ardunetcore.h"
-
-#line 1
 void setup() {
     Serial.begin(115200);
     Wifi.setMode(WIFI_MODE_DEVICE);
