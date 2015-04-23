@@ -39,7 +39,7 @@ class ArdunetWifi {
         void waitIP();
 };
 
-extern void Wifi_scan_found_bss(uint8* bssid, int channel, int rssi, int authmode, char* ssid, int is_hidden);
+extern void Wifi_scan_found_bss(uint8* bssid, int channel, int rssi, int authmode, char* ssid, int is_hidden)  __attribute__((weak));
 extern ArdunetWifi Wifi;
 
 #endif
