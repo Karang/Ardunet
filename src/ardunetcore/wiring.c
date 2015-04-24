@@ -38,6 +38,26 @@ LOCAL void interruptHandler() {
     GPIO_REG_WRITE(GPIO_STATUS_W1TC_ADDRESS, gpio_mask);
 }
 
+void interrupts() {
+    portEXIT_CRITICAL();
+    #define ETS_GPIO_INUM       4
+    _xt_isr_unmask(1<<ETS_GPIO_INUM);
+    _xt_isr_unmask(1<<ETS_UART_INUM);
+    _xt_isr_unmask(1<<ETS_MAX_INUM);
+    _xt_isr_unmask(1<<ETS_SOFT_INUM);
+    _xt_isr_unmask(1<<ETS_WDT_INUM);
+    _xt_isr_unmask(1<<ETS_FRC_TIMER1_INUM);
+}
+void noInterrupts() {
+    portENTER_CRITICAL();
+    _xt_isr_mask(1<<ETS_GPIO_INUM);
+    _xt_isr_mask(1<<ETS_UART_INUM);
+    _xt_isr_mask(1<<ETS_MAX_INUM);
+    _xt_isr_mask(1<<ETS_SOFT_INUM);
+    _xt_isr_mask(1<<ETS_WDT_INUM);
+    _xt_isr_mask(1<<ETS_FRC_TIMER1_INUM);
+}
+
 void ICACHE_FLASH_ATTR init(void) {
     for (int i=0 ; i<16 ; i++) {
         detachInterrupt(i);

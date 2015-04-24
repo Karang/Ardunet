@@ -1,13 +1,25 @@
 #include "ardunetcore/ardunetcore.h"
 
 #line 1
+WS2812 strip;
+
 void setup() {
-    pinMode(2, OUTPUT);
+  	strip.begin(2, 12);
 }
 
 void loop() {
-    digitalWrite(2, HIGH);
-    delay(500);
-    digitalWrite(2, LOW);
-    delay(500);
+  strip.setRGB(3, 10, 0, 0);
+  strip.sync();
+  delay(1000);
+  strip.setRGB(4, 0, 10, 0);
+  strip.sync();
+  delay(1000);
+  strip.setRGB(5, 0, 0, 10);
+  strip.sync();
+  delay(1000);
+  strip.setRGB(3, 0, 0, 0);
+  strip.setRGB(4, 0, 0, 0);
+  strip.setRGB(5, 0, 0, 0);
+  strip.sync();
+  delay(1000);
 }

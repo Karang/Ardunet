@@ -11,5 +11,6 @@ extern "C" {
 #include "ardunetcore/ArdunetHTTPClient.h"
 #include "ardunetcore/HardwareSerial.h"
 #include "ardunetcore/SpiFlash.h"
+#include "ardunetcore/WS2812.h"
 
 #endif

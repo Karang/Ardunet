@@ -43,9 +43,6 @@
 #define degrees(rad) ((rad)*RAD_TO_DEG)
 #define sq(x) ((x)*(x))
 
-#define interrupts() portEXIT_CRITICAL()
-#define noInterrupts() portENTER_CRITICAL()
-
 #define F_CPU CPU_CLK_FREQ
 #define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
 #define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
@@ -65,6 +62,9 @@ typedef unsigned int word;
 
 typedef uint8_t boolean;
 typedef uint8_t byte;
+
+void interrupts();
+void noInterrupts();
 
 void init(void);
 
